@@ -1,5 +1,5 @@
 import './App.css';
-import Minter from './Minter';
+import Minter from './components/Minter';
 
 function App() {
   return (
