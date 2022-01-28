@@ -8,7 +8,6 @@ const web3 = createAlchemyWeb3(alchemyKey);
 const ABI = require('../erc1155-sm-abi.json');
 
 export async function initContract() {
-	return;
 	if (!window.contract) {
 		window.contract = new web3.eth.Contract(ABI, contractAddress);
 	}
@@ -115,24 +114,10 @@ export const addWalletListener = (props) => {
 }
 
 export async function getSaleStatus() {
-	return SALE_STATUSES.ON;
 	return await window.contract.methods.status().call();
-	// const params = {
-	// 	to: contractAddress,
-	// 	from: window.ethereum.selectedAddress,
-	// 	'data': window.contract.methods
-	// 		.status()
-	// 		.encodeABI()
-	// }
-	// return await window.ethereum.request({
-	// 	method: "eth_sendTransaction",
-	// 	params: [params]
-	// });
 }
 
 export async function mintOnSale(tokenCount) {
-	$logger.error("⁉️ Contract is missing");
-	return { success: false, status: { msg: "⁉️ Contract is missing"} };
 	if (SALE_STATUSES.ON != getSaleStatus()) {
 		return {
 			success: false,
@@ -181,8 +166,6 @@ export async function mintOnSale(tokenCount) {
 }
 
 export async function mintOnPreSale(tokenCount) {
-	$logger.error("⁉️ Contract is missing");
-	return { success: false, status: { msg: "⁉️ Contract is missing"} };
 	if (!SALE_STATUSES.PRE !== getSaleStatus()) {
 		return {
 			success: false,
