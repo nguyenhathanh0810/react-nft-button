@@ -63,9 +63,6 @@ const Minter = (props) => {
 			return;
 		}
 		const response = await mintOnSale(tokensToMint);
-		/**
-		 * TODO: if contract is missing
-		 */
 		setStatus(response.status);
 	}
 
