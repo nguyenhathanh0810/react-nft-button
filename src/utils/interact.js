@@ -117,8 +117,12 @@ export async function getSaleStatus() {
 	return await window.contract.methods.status().call();
 }
 
+export async function getTotalSupply() {
+	return (await window.contract.methods.TOTAL_SUPPLY().call()).toString();
+}
+
 export async function mintOnSale(tokenCount) {
-	if (SALE_STATUSES.ON != getSaleStatus()) {
+	if (SALE_STATUSES.ON != await getSaleStatus()) {
 		return {
 			success: false,
       status: {
@@ -129,44 +133,42 @@ export async function mintOnSale(tokenCount) {
 	}
 	const price = await window.contract.methods.price().call();
 	const BN = web3.utils.BN;
+	let priceBN = new BN(price);
 	const params = {
-		value: (new BN(price)).mul(new BN(tokenCount)),
+		value: priceBN.mul(new BN(tokenCount)),
 		to: contractAddress,
-		from: window.ethereum.selectedAddress,
-		'data': window.contract.methods
-			.mintTokenOnSale(tokenCount)
-			.encodeABI()
+		from: window.ethereum.selectedAddress
 	}
-	try {
-		const gasEstimate = await window.ethereum.request({
-			method: "eth_estimateGas",
-			params: [params]
-		});
-		params['gas'] = new BN(gasEstimate);
-		const txHash = await window.ethereum.request({
-			method: "eth_sendTransaction",
-			params: [params]
-		});
-		return {
+	const result = window.contract.methods
+		.mintTokenOnSale(`${tokenCount}`)
+		.estimateGas(params).then(async (gasEsimate) => {
+			params['gas'] = new BN(gasEsimate);
+			return await window.contract.methods
+				.mintTokenOnSale(`${tokenCount}`)
+				.send(params);
+		})
+		.then(_tx => ({
 			success: true,
 			status: {
 				type: "darkgreen",
-				msg: `DONE 🎉 Check you transaction at ${txHash}`
+				msg: `DONE 🎉 Check you transaction at ${_tx.transactionHash}`
 			}
-		}
-	} catch (err) {
-		return {
-			success: false,
-      status: {
-				type: "crimson",
-				msg: "😥 Something went wrong: " + err.message,
+		}))
+		.catch(err => {
+			$logger.error({err});
+			return {
+				success: false,
+				status: {
+					type: "crimson",
+					msg: err.message,
+				}
 			}
-		}
-	}
+		});
+		return result;
 }
 
 export async function mintOnPreSale(tokenCount) {
-	if (!SALE_STATUSES.PRE !== getSaleStatus()) {
+	if (SALE_STATUSES.PRE != await getSaleStatus()) {
 		return {
 			success: false,
       status: {
@@ -177,40 +179,38 @@ export async function mintOnPreSale(tokenCount) {
 	}
 	const price = await window.contract.methods.price().call();
 	const BN = web3.utils.BN;
+	let priceBN = new BN(price);
 	const params = {
-		value: (new BN(price)).mul(new BN(tokenCount)),
+		value: priceBN.mul(new BN(tokenCount)),
 		to: contractAddress,
-		from: window.ethereum.selectedAddress,
-		'data': window.contract.methods
-			.mintTokenOnPreSale(tokenCount)
-			.encodeABI()
+		from: window.ethereum.selectedAddress
 	}
-	try {
-		const gasEstimate = await window.ethereum.request({
-			method: "eth_estimateGas",
-			params: [params]
-		});
-		params['gas'] = new BN(gasEstimate);
-		const txHash = await window.ethereum.request({
-			method: "eth_sendTransaction",
-			params: [params]
-		});
-		return {
+	const result = window.contract.methods
+		.mintTokenOnPreSale(`${tokenCount}`)
+		.estimateGas(params).then(async (gasEsimate) => {
+			params['gas'] = new BN(gasEsimate);
+			return await window.contract.methods
+				.mintTokenOnPreSale(`${tokenCount}`)
+				.send(params);
+		})
+		.then(_tx => ({
 			success: true,
 			status: {
 				type: "darkgreen",
-				msg: `DONE 🎉 Check you transaction at ${txHash}`
+				msg: `DONE 🎉 Check you transaction at ${_tx.transactionHash}`
 			}
-		}
-	} catch (err) {
-		return {
-			success: false,
-      status: {
-				type: "crimson",
-				msg: err.message,
+		}))
+		.catch(err => {
+			$logger.error({err});
+			return {
+				success: false,
+				status: {
+					type: "crimson",
+					msg: err.message,
+				}
 			}
-		}
-	}
+		});
+		return result;
 }
 
 const $logger = (() => {

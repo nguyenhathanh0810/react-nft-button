@@ -4,6 +4,7 @@ import {
 	connectWallet,
 	getCurrentConnectedWallet,
 	getSaleStatus,
+	getTotalSupply,
 	initContract,
 	mintOnPreSale,
 	mintOnSale
@@ -17,14 +18,24 @@ const MAX_TOKEN_PER_MINT = 5;
 const Minter = (props) => {
 	const [walletAddress, setWallet] = useState("")
 	const [status, setStatus] = useState({ type: "", msg: "" });
-	const [saleManager, setSaleManager] = useState({ status: SALE_STATUSES.ON });
+	const [saleStatus, setSaleStatus] = useState(SALE_STATUSES.OFF);
+	const [saleTotalSupply, setSaleTotalSupply] = useState(0);
 	const [tokensToMint, setTokensToMint] = useState("");
 
 	useEffect(async () => {
 		// Init contract
 		await initContract();
 		const saleStatus = await getSaleStatus();
-		setSaleManager({ status: saleStatus });
+		setSaleStatus(saleStatus);
+
+		// Get tokens remain available
+		const getTokensRemainAvailable = async () => {
+			const totalSupply = await getTotalSupply();
+			setSaleTotalSupply(totalSupply);
+			console.log("Hello");
+			return getTokensRemainAvailable;
+		};
+		setInterval(await getTokensRemainAvailable(), 5000);
 
 		// Init wallet on load
 		const { address, status } = await getCurrentConnectedWallet();
@@ -34,6 +45,10 @@ const Minter = (props) => {
 			addressChangeHandler: setWallet,
 			statusChangeHandler: setStatus
 		})
+
+		return () => {
+			clearInterval(getTokensRemainAvailable);
+		}
 	}, []);
 
 	const onConnectWallet = async () => {
@@ -44,7 +59,7 @@ const Minter = (props) => {
 
 	const onMintAtSaleStage = async (e) => {
 		e.preventDefault();
-		if (!validateInput(tokensToMint)) {
+		if (!validate(tokensToMint)) {
 			return;
 		}
 		const response = await mintOnSale(tokensToMint);
@@ -56,33 +71,38 @@ const Minter = (props) => {
 
 	const onMintAtPreSaleStage = async (e) => {
 		e.preventDefault();
-		if (!validateInput(tokensToMint)) {
+		if (!validate(tokensToMint)) {
 			return;
 		}
 		const response = await mintOnPreSale(tokensToMint);
-		/**
-		 * TODO: if contract is missing
-		 */
 		setStatus(response.status);
 	}
 
 	const handleTokensToMintChange = (e) => {
 		const value = e.target.value;
-		if (validateInput(value)) {
+		if (validate(value)) {
 			setTokensToMint(value);
 		}
 	}
 
-	const validateInput = (value) => {
-		if (0 < value && value <= MAX_TOKEN_PER_MINT) {
-			return true;
+	const validate = (value) => {
+		if (!(0 < value && value <= MAX_TOKEN_PER_MINT)) {
+			setStatus({
+				type: "crimson",
+				msg: `❗️You can only mint between 1 to ${MAX_TOKEN_PER_MINT} tokens at a time`
+			});
+			setTimeout(() => setStatus({ type: "", msg: "" }), 5000);
+			return false;
 		}
-		setStatus({
-			type: "crimson",
-			msg: `❗️You can only mint between 1 to ${MAX_TOKEN_PER_MINT} tokens at a time`
-		});
-		setTimeout(() => setStatus({ type: "", msg: "" }), 5000);
-		return false;
+		if (!walletAddress) {
+			setStatus({
+				type: "darkred",
+				msg: "🦊 Connect to the Metamask to start minting"
+			});
+			return false;
+		}
+
+		return true;
 	}
 
 	return (
@@ -107,6 +127,10 @@ const Minter = (props) => {
 				)}
 			</div>
 			<h1 className="headline">🌌 NFT Minter</h1>
+			<h4 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+				<span className="pulse"></span>
+				TOKENS REMAIN AVAILABLE:&nbsp;
+				<span>{ saleTotalSupply || 0 }</span></h4>
 			<form>
 				<div className="form-group">
 					<div className="input-group">
@@ -122,7 +146,7 @@ const Minter = (props) => {
 					</div>
 				</div>
 				<div className="form-group">
-					{SALE_STATUSES.ON == saleManager.status && (
+					{SALE_STATUSES.ON == saleStatus && (
 						<button id="buttonMintOnSale"
 							className="minter-button button-mint"
 							onClick={onMintAtSaleStage}
@@ -130,12 +154,22 @@ const Minter = (props) => {
 							MINT
 						</button>
 					)}
-					{SALE_STATUSES.PRE == saleManager.status && (
+					{SALE_STATUSES.PRE == saleStatus && (
 						<button id="buttonMinOnPreSale"
 							className="minter-button button-mint"
 							onClick={onMintAtPreSaleStage}
 						>
 							MINT
+						</button>
+					)}
+					{SALE_STATUSES.OFF == saleStatus && (
+						<button id="disabledButton"
+							disabled
+							onClick={e => e.preventDefault()}
+							className="minter-button button-mint"
+							style={{ cursor: "no-drop" }}
+						>
+							THE SALE IS OFF
 						</button>
 					)}
 				</div>
