@@ -4,9 +4,10 @@
 - ReactJS: v17.0.2
 
 ## Dependencies
-- `react-scripts`: 4.0.3
 - `dotenv`: latest version
 - `@alch/alchemy-web3`: 1.0.1
+
+`npm install @alch/alchemy-web3 dotenv`
 
 ## How to use
 
@@ -37,3 +38,8 @@
     REACT_APP_ALCHEMY_KEY=<Your-Alchemy-Key>
     REACT_APP_CONTRACT_ADDRESS=<Your-Contract-Address>
     ```
+
+## Trouble shooting
+Issue discussion at: https://github.com/ChainSafe/web3.js/issues/4638#issuecomment-996777895
+
+Resolve: from your React project v17.0.2, downgrade react-scripts from `5.0.0` to `4.0.3`, then reinstall you project by running `npm install`
