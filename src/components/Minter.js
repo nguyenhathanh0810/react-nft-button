@@ -14,12 +14,14 @@ import { SALE_STATUSES } from "../utils/constants";
 import "./styles/Minter.css";
 
 const MAX_TOKEN_PER_MINT = 5;
+const INITIAL_SALE_STATUS = -1;
 
 const Minter = (props) => {
 	const [walletAddress, setWallet] = useState("")
 	const [status, setStatus] = useState({ type: "", msg: "" });
-	const [saleStatus, setSaleStatus] = useState(SALE_STATUSES.OFF);
+	const [saleStatus, setSaleStatus] = useState(INITIAL_SALE_STATUS);
 	const [saleTotalSupply, setSaleTotalSupply] = useState(0);
+	const [isMintingDisabled, setMintingDisability] = useState(false);
 	const [tokensToMint, setTokensToMint] = useState("");
 
 	useEffect(async () => {
@@ -32,7 +34,9 @@ const Minter = (props) => {
 		const getTokensRemainAvailable = async () => {
 			const totalSupply = await getTotalSupply();
 			setSaleTotalSupply(totalSupply);
-			console.log("Hello");
+			if (!isMintingDisabled && totalSupply < 1) {
+				setMintingDisability(true);
+			}
 			return getTokensRemainAvailable;
 		};
 		setInterval(await getTokensRemainAvailable(), 5000);
@@ -59,18 +63,26 @@ const Minter = (props) => {
 
 	const onMintAtSaleStage = async (e) => {
 		e.preventDefault();
-		if (!validate(tokensToMint)) {
+		if (isMintingDisabled || !validate(tokensToMint)) {
 			return;
 		}
+		setStatus({
+			type: "magenta",
+			msg: "Minting started..."
+		});
 		const response = await mintOnSale(tokensToMint);
 		setStatus(response.status);
 	}
 
 	const onMintAtPreSaleStage = async (e) => {
 		e.preventDefault();
-		if (!validate(tokensToMint)) {
+		if (isMintingDisabled || !validate(tokensToMint)) {
 			return;
 		}
+		setStatus({
+			type: "magenta",
+			msg: "Minting started..."
+		});
 		const response = await mintOnPreSale(tokensToMint);
 		setStatus(response.status);
 	}
@@ -88,7 +100,6 @@ const Minter = (props) => {
 				type: "crimson",
 				msg: `❗️You can only mint between 1 to ${MAX_TOKEN_PER_MINT} tokens at a time`
 			});
-			setTimeout(() => setStatus({ type: "", msg: "" }), 5000);
 			return false;
 		}
 		if (!walletAddress) {
@@ -123,10 +134,10 @@ const Minter = (props) => {
 					</button>
 				)}
 			</div>
-			<h1 className="headline">🌌 NFT Minter</h1>
+			<h1 className="headline">🌄 NFT Minter</h1>
 			<h4 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
 				<span className="pulse"></span>
-				TOKENS REMAIN AVAILABLE:&nbsp;
+				Tokens remain available:&nbsp;
 				<span>{ saleTotalSupply || 0 }</span></h4>
 			<form>
 				<div className="form-group">
@@ -145,18 +156,22 @@ const Minter = (props) => {
 				<div className="form-group">
 					{SALE_STATUSES.ON == saleStatus && (
 						<button id="buttonMintOnSale"
-							className="minter-button button-mint"
+							className={"minter-button button-mint"
+								+ `${isMintingDisabled ? ' disabled' : ''}`
+							}
 							onClick={onMintAtSaleStage}
 						>
-							MINT
+							{isMintingDisabled ? 'NO TOKENS AVAILABLE' : 'MINT'}
 						</button>
 					)}
 					{SALE_STATUSES.PRE == saleStatus && (
 						<button id="buttonMinOnPreSale"
-							className="minter-button button-mint"
+							className={"minter-button button-mint"
+								+ `${isMintingDisabled ? ' disabled' : ''}`
+							}
 							onClick={onMintAtPreSaleStage}
 						>
-							MINT
+							{isMintingDisabled ? 'NO TOKENS AVAILABLE' : 'MINT'}
 						</button>
 					)}
 					{SALE_STATUSES.OFF == saleStatus && (
