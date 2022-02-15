@@ -125,6 +125,12 @@ export async function getTotalSupply() {
 	return await window.contract.methods.TOTAL_SUPPLY().call();
 }
 
+export async function getRemainingSupply() {
+	const totalSupply = await getTotalSupply();
+	const nextIndex = await window.contract.methods.nextIndex().call();
+	return parseInt(totalSupply) - parseInt(nextIndex);
+}
+
 export async function getMaxMint() {
 	return await window.contract.methods.maxMint().call();
 }

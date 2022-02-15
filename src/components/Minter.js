@@ -4,9 +4,9 @@ import {
 	connectWallet,
 	getCurrentConnectedWallet,
 	getMaxMint,
+	getRemainingSupply,
 	getSaleStage,
 	getSaleStatus,
-	getTotalSupply,
 	initContract,
 	mintOnPreSale,
 	mintOnSale
@@ -43,10 +43,10 @@ const Minter = (props) => {
 
 		// Get tokens remain available
 		const getTokensRemainAvailable = async () => {
-			const totalSupply = await getTotalSupply();
+			const remainingSupply = await getRemainingSupply();
 			const stage = SALE_SECTION[_saleStage].index;
 			const stageSupply = SUPPLY_CAP[stage];
-			let supply = stageSupply - (SUPPLY_CAP.stage3 - totalSupply);
+			let supply = stageSupply - (SUPPLY_CAP.stage3 - remainingSupply);
 			if (supply < 0) {
 				supply = 0;
 			}
