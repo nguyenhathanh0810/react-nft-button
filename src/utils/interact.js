@@ -1,4 +1,4 @@
-import { SALE_STATUSES } from './constants';
+import { SALE_STATUS } from './constants';
 
 require('dotenv').config();
 const alchemyKey = process.env.REACT_APP_ALCHEMY_KEY;
@@ -117,12 +117,20 @@ export async function getSaleStatus() {
 	return await window.contract.methods.status().call();
 }
 
+export async function getSaleStage() {
+	return await window.contract.methods.stage().call();
+}
+
 export async function getTotalSupply() {
-	return (await window.contract.methods.TOTAL_SUPPLY().call()).toString();
+	return await window.contract.methods.TOTAL_SUPPLY().call();
+}
+
+export async function getMaxMint() {
+	return await window.contract.methods.maxMint().call();
 }
 
 export async function mintOnSale(tokenCount) {
-	if (SALE_STATUSES.ON != await getSaleStatus()) {
+	if (SALE_STATUS.ON != await getSaleStatus()) {
 		return {
 			success: false,
       status: {
@@ -168,7 +176,7 @@ export async function mintOnSale(tokenCount) {
 }
 
 export async function mintOnPreSale(tokenCount) {
-	if (SALE_STATUSES.PRE != await getSaleStatus()) {
+	if (SALE_STATUS.PRE != await getSaleStatus()) {
 		return {
 			success: false,
       status: {

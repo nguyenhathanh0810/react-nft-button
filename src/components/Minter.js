@@ -3,38 +3,55 @@ import {
 	addWalletListener,
 	connectWallet,
 	getCurrentConnectedWallet,
+	getMaxMint,
+	getSaleStage,
 	getSaleStatus,
 	getTotalSupply,
 	initContract,
 	mintOnPreSale,
 	mintOnSale
 } from "../utils/interact";
-import { SALE_STATUSES } from "../utils/constants";
+import { SALE_SECTION, SALE_STATUS, SUPPLY_CAP } from "../utils/constants";
 
 import "./styles/Minter.css";
 
-const MAX_TOKEN_PER_MINT = 5;
+const MAX_MINT_PER_WALLET = 10;
 const INITIAL_SALE_STATUS = -1;
+const OFF_STAGE = -1;
 
 const Minter = (props) => {
 	const [walletAddress, setWallet] = useState("")
 	const [status, setStatus] = useState({ type: "", msg: "" });
+	const [saleStage, setSaleStage] = useState(OFF_STAGE);
 	const [saleStatus, setSaleStatus] = useState(INITIAL_SALE_STATUS);
 	const [saleTotalSupply, setSaleTotalSupply] = useState(0);
+	const [maxMint, setMaxMint] = useState(MAX_MINT_PER_WALLET);
 	const [isMintingDisabled, setMintingDisability] = useState(false);
 	const [tokensToMint, setTokensToMint] = useState("");
 
 	useEffect(async () => {
-		// Init contract
 		await initContract();
-		const saleStatus = await getSaleStatus();
-		setSaleStatus(saleStatus);
+
+		const _saleStage = await getSaleStage();
+		setSaleStage(_saleStage); 
+
+		const _saleStatus = await getSaleStatus();
+		setSaleStatus(_saleStatus);
+
+		const _maxMint = await getMaxMint();
+		setMaxMint(parseInt(_maxMint));
 
 		// Get tokens remain available
 		const getTokensRemainAvailable = async () => {
 			const totalSupply = await getTotalSupply();
-			setSaleTotalSupply(totalSupply);
-			if (!isMintingDisabled && totalSupply < 1) {
+			const stage = SALE_SECTION[_saleStage].index;
+			const stageSupply = SUPPLY_CAP[stage];
+			let supply = stageSupply - (SUPPLY_CAP.stage3 - totalSupply);
+			if (supply < 0) {
+				supply = 0;
+			}
+			setSaleTotalSupply(supply);
+			if (!isMintingDisabled && !supply) {
 				setMintingDisability(true);
 			}
 			return getTokensRemainAvailable;
@@ -95,10 +112,10 @@ const Minter = (props) => {
 	}
 
 	const validate = (value) => {
-		if (!(0 < value && value <= MAX_TOKEN_PER_MINT)) {
+		if (!(0 < value && value <= maxMint)) {
 			setStatus({
 				type: "crimson",
-				msg: `❗️You can only mint between 1 to ${MAX_TOKEN_PER_MINT} tokens at a time`
+				msg: `❗️You can only mint between 1 to ${maxMint} tokens at a time`
 			});
 			return false;
 		}
@@ -146,15 +163,15 @@ const Minter = (props) => {
 						<input
 							id="numberOfMints"
 							type="number"
-							min={1} max={5}
-							placeholder="up to 5"
+							min={1} max={maxMint}
+							placeholder={`up to ${maxMint} per wallet`}
 							value={tokensToMint}
 							onChange={handleTokensToMintChange}
 						/>
 					</div>
 				</div>
 				<div className="form-group">
-					{SALE_STATUSES.ON == saleStatus && (
+					{SALE_STATUS.ON == saleStatus && (
 						<button id="buttonMintOnSale"
 							className={"minter-button button-mint"
 								+ `${isMintingDisabled ? ' disabled' : ''}`
@@ -164,7 +181,7 @@ const Minter = (props) => {
 							{isMintingDisabled ? 'NO TOKENS AVAILABLE' : 'MINT'}
 						</button>
 					)}
-					{SALE_STATUSES.PRE == saleStatus && (
+					{SALE_STATUS.PRE == saleStatus && (
 						<button id="buttonMinOnPreSale"
 							className={"minter-button button-mint"
 								+ `${isMintingDisabled ? ' disabled' : ''}`
@@ -174,7 +191,7 @@ const Minter = (props) => {
 							{isMintingDisabled ? 'NO TOKENS AVAILABLE' : 'MINT'}
 						</button>
 					)}
-					{SALE_STATUSES.OFF == saleStatus && (
+					{SALE_STATUS.OFF == saleStatus && (
 						<button id="disabledButton"
 							disabled
 							onClick={e => e.preventDefault()}

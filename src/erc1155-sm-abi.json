@@ -27,10 +27,23 @@
 	},
 	{
 		"inputs": [],
+		"name": "stage",
+		"outputs": [
+			{
+				"internalType": "enum ERC1155NFTBase.STAGE",
+				"name": "",
+				"type": "uint8"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
 		"name": "status",
 		"outputs": [
 			{
-				"internalType": "enum NFTBase.STATUS",
+				"internalType": "enum ERC1155NFTBase.STATUS",
 				"name": "",
 				"type": "uint8"
 			}
@@ -54,6 +67,19 @@
 	{
 		"inputs": [],
 		"name": "TOTAL_SUPPLY",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "maxMint",
 		"outputs": [
 			{
 				"internalType": "uint256",
