@@ -170,6 +170,10 @@ export async function mintOnSale(tokenCount) {
 		}))
 		.catch(err => {
 			$logger.error({err});
+			let msg = err.message;
+			if (msg.includes("Over max token can mint")) {
+				msg = "Exceeded max number of tokens allowed";
+			}
 			return {
 				success: false,
 				status: {
@@ -216,6 +220,10 @@ export async function mintOnPreSale(tokenCount) {
 		}))
 		.catch(err => {
 			$logger.error({err});
+			let msg = err.message;
+			if (msg.includes("Over max token can mint")) {
+				msg = "Exceeded max number of tokens allowed";
+			}
 			return {
 				success: false,
 				status: {
