@@ -178,7 +178,7 @@ export async function mintOnSale(tokenCount) {
 				success: false,
 				status: {
 					type: "crimson",
-					msg: err.message,
+					msg,
 				}
 			}
 		});
@@ -228,7 +228,7 @@ export async function mintOnPreSale(tokenCount) {
 				success: false,
 				status: {
 					type: "crimson",
-					msg: err.message,
+					msg,
 				}
 			}
 		});
