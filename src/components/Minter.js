@@ -58,6 +58,18 @@ const Minter = (props) => {
 		};
 		setInterval(await getTokensRemainAvailable(), 5000);
 
+		const retrievetLiveOnSaleParams = async () => {
+			const _saleStage = await getSaleStage();
+			setSaleStage(_saleStage); 
+
+			const _saleStatus = await getSaleStatus();
+			setSaleStatus(_saleStatus);
+
+			const _maxMint = await getMaxMint();
+			setMaxMint(parseInt(_maxMint));
+		}
+		setInterval(retrievetLiveOnSaleParams, 5000);
+
 		// Init wallet on load
 		const { address, status } = await getCurrentConnectedWallet();
 		setWallet(address);
@@ -69,6 +81,7 @@ const Minter = (props) => {
 
 		return () => {
 			clearInterval(getTokensRemainAvailable);
+			clearInterval(retrievetLiveOnSaleParams);
 		}
 	}, []);
 

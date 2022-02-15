@@ -135,7 +135,7 @@ export async function mintOnSale(tokenCount) {
 			success: false,
       status: {
 				type: "darkred",
-				msg: "The sale is off. Let's get back later 👐",
+				msg: "The sale is not active.",
 			}
 		};
 	}
@@ -181,7 +181,7 @@ export async function mintOnPreSale(tokenCount) {
 			success: false,
       status: {
 				type: "darkred",
-				msg: "It's not time for Pre Sale",
+				msg: "The pres-sale is not active.",
 			}
 		};
 	}
