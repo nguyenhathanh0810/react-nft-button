@@ -41,34 +41,9 @@ const Minter = (props) => {
 		const _maxMint = await getMaxMint();
 		setMaxMint(parseInt(_maxMint));
 
-		// Get tokens remain available
-		const getTokensRemainAvailable = async () => {
-			const remainingSupply = await getRemainingSupply();
-			const stage = SALE_SECTION[_saleStage].index;
-			const stageSupply = SUPPLY_CAP[stage];
-			let supply = stageSupply - (SUPPLY_CAP.stage3 - remainingSupply);
-			if (supply < 0) {
-				supply = 0;
-			}
-			setSaleTotalSupply(supply);
-			if (!isMintingDisabled && !supply) {
-				setMintingDisability(true);
-			}
-			return getTokensRemainAvailable;
-		};
-		setInterval(await getTokensRemainAvailable(), 5000);
+		setInterval(await getTokensRemainAvailable(_saleStage), 120000);
 
-		const retrievetLiveOnSaleParams = async () => {
-			const _saleStage = await getSaleStage();
-			setSaleStage(_saleStage); 
-
-			const _saleStatus = await getSaleStatus();
-			setSaleStatus(_saleStatus);
-
-			const _maxMint = await getMaxMint();
-			setMaxMint(parseInt(_maxMint));
-		}
-		setInterval(retrievetLiveOnSaleParams, 5000);
+		setInterval(retrievetLiveOnSaleParams, 120000);
 
 		// Init wallet on load
 		const { address, status } = await getCurrentConnectedWallet();
@@ -144,6 +119,33 @@ const Minter = (props) => {
 		}
 
 		return true;
+	}
+
+	// Get tokens remain available
+	const getTokensRemainAvailable = async (stageIndex) => {
+		const remainingSupply = await getRemainingSupply();
+		const stage = SALE_SECTION[stageIndex].index;
+		const stageSupply = SUPPLY_CAP[stage];
+		let supply = stageSupply - (SUPPLY_CAP.stage3 - remainingSupply);
+		if (supply < 0) {
+			supply = 0;
+		}
+		setSaleTotalSupply(supply);
+		if (!isMintingDisabled && !supply) {
+			setMintingDisability(true);
+		}
+		return () => getTokensRemainAvailable(stageIndex);
+	};
+
+	const retrievetLiveOnSaleParams = async () => {
+		const _saleStage = await getSaleStage();
+		setSaleStage(_saleStage); 
+
+		const _saleStatus = await getSaleStatus();
+		setSaleStatus(_saleStatus);
+
+		const _maxMint = await getMaxMint();
+		setMaxMint(parseInt(_maxMint));
 	}
 
 	return (
