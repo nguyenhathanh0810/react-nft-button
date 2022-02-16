@@ -119,7 +119,10 @@ const Minter = (props) => {
 
 	const handleTokensToMintChange = (e) => {
 		const value = e.target.value;
-		if (validate(value)) {
+		/**
+		 * Allow client to clear the input
+		 */
+		if ('' === value || validate(value)) {
 			setTokensToMint(value);
 		}
 	}

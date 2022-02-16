@@ -80,6 +80,7 @@
 }
 
 .nft-minter #status {
+	font-size: 1.2rem;
 	word-break: break-word;
 }
 
@@ -90,15 +91,15 @@
   height: 20px;
   width: 20px;
   transform: scale(1);
-	background: lightseagreen;
-  box-shadow: 0 0 0 0 rgba(51, 217, 178, 1);
-  animation: pulse 2s infinite;
+	background: #fbaa0b;
+  box-shadow: 0 0 0 0 rgb(251 167 0);
+  animation: pulse 1.2s infinite;
 }
 
 @keyframes pulse {
   0% {
     transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(37, 184, 149, 0.7);
+    box-shadow: 0 0 0 0 rgb(228 183 93);
   }
   
   70% {
